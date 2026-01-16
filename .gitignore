@@ -1,0 +1,19 @@
+﻿# C/C++ build outputs
+build/
+build-*/
+build-vscode/
+
+
+# Visual Studio Code artifacts
+.cache/*
+.vscode/*
+.history/
+
+# QtCreator
+*.user
+
+# Other
+libs/
+schemas/
+.env
+*.drawio
