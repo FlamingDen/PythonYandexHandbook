@@ -1,41 +1,21 @@
 ﻿from itertools import product
-from itertools import permutations
-from itertools import cycle
+from itertools import combinations
 
+# Ваш стиль, но с циклическим поведением
 suits = ["бубен", "пик", "треф", "червей"]
-cards = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "валет", "дама", "король", "туз"]
-# cards = list(reversed(cards))
+cards = ["10", "2", "3", "4", "5", "6", "7", "8", "9", "валет", "дама", "король", "туз"]
+SUIT_MAP = {"буби": "бубен", "пики": "пик", "трефы": "треф", "черви": "червей"}
 
-goal = ""
-match input():
-    case "буби":
-        goal = "бубен"
-    case "пики":
-        goal = "пик"
-    case "трефы":
-        goal = "треф"
-    case "черви":
-        goal = "червей"
-
-removed = input()
-cards.remove(removed)
+goal = SUIT_MAP.get(input(), "")
+removed_card = input()
+if removed_card in cards:
+    cards.remove(removed_card)
 prev = input()
 
-res = list(product(cards, suits))
-ans = permutations(res, 3)
+all_suitable = []
+for combo in combinations(product(cards, suits), 3):
+    if any(suit == goal for _, suit in combo):
+        string = ", ".join(f"{card} {suit}" for card, suit in combo)
+        all_suitable.append(string)
 
-check = False
-for val in cycle(ans):
-    string = ", ".join(f"{n1} {n2}" for n1, n2 in val)
-    if goal in string:
-        if not check:
-            if prev == string:
-                check = True
-        else:
-            print(string)
-            break
-    print(string)
-        
-
-
-
+print(all_suitable[all_suitable.index(prev) + 1])
