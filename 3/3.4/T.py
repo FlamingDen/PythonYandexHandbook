@@ -10,121 +10,92 @@ REPLACEMENTS = {
     "(": " ( ",
     ")": " ) ",
 }
+expression = input()
+
+# Очищаем выражение
+# Clean the expression
+for old_value, new_value in REPLACEMENTS.items():
+    expression = expression.replace(old_value, new_value)
+
+expression = expression.split()
 
 PRECEDENCE = {
-    "not": 6,  # самый высокий (отрицание)
-    "^": 5,  # строгая дизъюнкция (XOR)
-    "and": 4,  # конъюнкция
-    "or": 3,  # дизъюнкция
-    "->": 2,  # импликация
-    "~": 1,  # эквивалентность (самый низкий)
+    "not": 5,
+    "and": 4,
+    "or": 3,
+    "->": 2,
+    "~": 2,
+    "^": 2,
 }
 
-condition = input()
-for old_value, new_value in REPLACEMENTS.items():
-    condition = condition.replace(old_value, new_value)
-vars = [char for char in set(condition) if char.isupper()]
-vars.sort()
+ASSOCIATIVITY = {
+    "not": "right",
+    "~": "left",
+    "and": "left",
+    "or": "left",
+    "^": "left",
+    "->": "left",
+}
 
-status = [0, 1]
-tupls = list(product(status, repeat=len(vars)))
+postfix_expression = []
+operator_stack = []
 
-tokens = condition.split()
+for token in expression:
+    if token.isupper():
+        postfix_expression.append(token)
+    elif token in PRECEDENCE:
+        while (
+            operator_stack
+            and operator_stack[-1] != "("
+            and (
+                ASSOCIATIVITY[token] == "left"
+                and PRECEDENCE[token] <= PRECEDENCE[operator_stack[-1]]
+                or ASSOCIATIVITY[token] == "right"
+                and PRECEDENCE[token] < PRECEDENCE[operator_stack[-1]]
+            )
+        ):
+            postfix_expression.append(operator_stack.pop())
+        operator_stack.append(token)
+    elif token == "(":
+        operator_stack.append(token)
+    elif token == ")":
+        while operator_stack and operator_stack[-1] != "(":
+            postfix_expression.append(operator_stack.pop())
+        if operator_stack and operator_stack[-1] == "(":
+            operator_stack.pop()
 
-print(*vars, "F")
-for args in tupls:
-    curr_args = dict(zip(vars, args))
-    value_stack = []
-    operations_stack = []
 
-    for i in range(len(tokens)):
-        curr = tokens[i]
-        if curr.isupper():
-            value_stack.append(curr_args[curr])
-        elif curr == "(":
-            operations_stack.append(curr)
-        elif curr == ")":
-            while operations_stack[-1] != "(":
-                curr_oper = operations_stack.pop()
-                if curr_oper == "not":
-                    if not value_stack:
-                        quit()
-                    value_stack.append(not value_stack.pop())
-                else:
-                    if len(value_stack) < 2:
-                        quit()
-                    a = value_stack.pop()
-                    b = value_stack.pop()
-                    match curr_oper:
-                        case "and":
-                            value_stack.append(a and b)
-                        case "or":
-                            value_stack.append(a or b)
-                        case "->":
-                            value_stack.append(not b or a)
-                        case "~":
-                            value_stack.append(b == a)
-                        case "^":
-                            value_stack.append(a ^ b)
-            operations_stack.pop()
-        elif curr in PRECEDENCE:
-            # нажо рассмтореть 3 варинта
-            # 1. текущий приоритет выше чем который лежит в стеке сверху(просто кладем)
-            # 2. екущий приоритет ниже (выполняем что сейчас на стеке последнюю операцию)
-            # 3. равен (тоже выполняем пока не будет скобка или занк с приоритеттом выше)
-            # 4. если находим ')' -> выполняем все поочереди пока не найдем открывающую скорбку '('
-            top = operations_stack[-1] if operations_stack else None
-            if not operations_stack or top == "(" or PRECEDENCE[top] < PRECEDENCE[curr]:
-                operations_stack.append(curr)
-            else:
-                while (
-                    operations_stack
-                    and PRECEDENCE[operations_stack[-1]] >= PRECEDENCE[curr]
-                ):
-                    curr_oper = operations_stack.pop()
-                    if curr_oper == "not":
-                        if not value_stack:
-                            quit()
-                        value_stack.append(not value_stack.pop())
-                    else:
-                        if len(value_stack) < 2:
-                            quit()
-                        a = value_stack.pop()
-                        b = value_stack.pop()
-                        match curr_oper:
-                            case "and":
-                                value_stack.append(a and b)
-                            case "or":
-                                value_stack.append(a or b)
-                            case "->":
-                                value_stack.append(not b or a)
-                            case "~":
-                                value_stack.append(b == a)
-                            case "^":
-                                value_stack.append(a ^ b)
-                operations_stack.append(curr)
+while operator_stack:
+    postfix_expression.append(operator_stack.pop())
 
-    while operations_stack:
-        curr_oper = operations_stack.pop()
-        if curr_oper == "not":
-            if not value_stack:
-                break
-            value_stack.append(not value_stack.pop())
+unique_vars = sorted(set(filter(lambda x: x.isupper(), postfix_expression)))
+repeats = len(unique_vars)
+
+print(*unique_vars, "F")
+
+for vars in product(range(2), repeat=repeats):
+    variable_to_value = dict(zip(unique_vars, vars))
+    stack = []
+
+    for token in postfix_expression:
+        if token.isupper():
+            stack.append(variable_to_value[token])
+        elif token == "not":
+            stack.append(not stack.pop())
         else:
-            if len(value_stack) < 2:
-                break
-            a = value_stack.pop()
-            b = value_stack.pop()
-            match curr_oper:
+            operand_two = stack.pop()
+            operand_one = stack.pop()
+            match token:
                 case "and":
-                    value_stack.append(a and b)
+                    stack.append(operand_one and operand_two)
                 case "or":
-                    value_stack.append(a or b)
-                case "->":
-                    value_stack.append(not b or a)
+                    stack.append(operand_one or operand_two)
                 case "~":
-                    value_stack.append(a == b)
+                    stack.append(operand_one == operand_two)
+                case "->":
+                    stack.append(not operand_one or operand_two)
                 case "^":
-                    value_stack.append(a ^ b)
+                    stack.append(operand_one ^ operand_two)
 
-    print(*args, int(value_stack.pop()))
+    f = int(stack.pop())
+    print(*vars, f)
