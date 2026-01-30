@@ -14,5 +14,5 @@
 ]
 
 
-def month(number, language):
+def month(number, language="ru"):
     return TRANSLATE[number - 1][language]
