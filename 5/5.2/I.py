@@ -70,12 +70,14 @@
         return Fraction(-self.sign * self.n, self.d)
 
     def __add__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         return Fraction(
             self.sign * self.n * other.d + other.sign * other.n * self.d,
             self.d * other.d,
         )
 
     def __iadd__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         n = self.sign * self.n * other.d + other.sign * other.n * self.d
         d = self.d * other.d
         self.n = abs(n)
@@ -85,12 +87,14 @@
         return self
 
     def __sub__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         return Fraction(
             self.sign * self.n * other.d - other.sign * other.n * self.d,
             self.d * other.d,
         )
 
     def __isub__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         n = self.sign * self.n * other.d - other.sign * other.n * self.d
         d = self.d * other.d
         self.n = abs(n)
@@ -100,9 +104,11 @@
         return self
 
     def __mul__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         return Fraction(self.sign * self.n * other.sign * other.n, self.d * other.d)
 
     def __imul__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         res = self * other
         self.sign = res.sign
         self.n = res.n
@@ -110,9 +116,11 @@
         return self
 
     def __truediv__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         return Fraction(self.sign * self.n * other.sign * other.d, self.d * other.n)
 
     def __itruediv__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         res = self / other
         self.sign = res.sign
         self.n = res.n
@@ -120,30 +128,35 @@
         return self
 
     def reverse(self):
-        eval()
         return Fraction(self.sign * self.d, self.n)
 
     def __lt__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         return self.sign * self.n / self.d < other.sign * other.n / other.d
 
     def __le__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         return self.sign * self.n / self.d <= other.sign * other.n / other.d
 
     def __eq__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         return self.sign * self.n / self.d == other.sign * other.n / other.d
 
     def __ne__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         return self.sign * self.n / self.d != other.sign * other.n / other.d
 
     def __gt__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         return self.sign * self.n / self.d > other.sign * other.n / other.d
 
     def __ge__(self, other):
+        other = other if isinstance(other, Fraction) else Fraction(other)
         return self.sign * self.n / self.d >= other.sign * other.n / other.d
-    
+
 
 a = Fraction(1)
-b = Fraction('2')
+b = Fraction("2")
 c, d = map(Fraction.reverse, (a + 2, b - 1))
 print(a, b, c, d)
 print(a > b, c > d)
