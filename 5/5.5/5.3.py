@@ -485,7 +485,7 @@ class Bank:
             phone,
             payment_system,
             card_class=SavingCard,
-            **kwargs,
+            **kwargs, 
         )
 
     def get_global_history(self) -> list:
